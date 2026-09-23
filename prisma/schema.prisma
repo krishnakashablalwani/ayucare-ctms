@@ -1,0 +1,123 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model ClinicalTrial {
+  id                    String            @id @default(uuid())
+  ctriId                String            @unique
+  protocolNumber        String            @unique
+  studyTitle            String
+  therapeuticArea       String            @default("Ayurveda")
+  trialPhase            String            // Phase I, Phase II, Phase III, Phase IV, Observational
+  ndctStatus            String            // e.g., "Approved by CDSCO (NDCT Rules 2019)"
+  ethicsApprovalDate    String
+  leadInstitution       String            @default("All India Institute of Ayurveda (AIIA), New Delhi")
+  principalInvestigator String
+  targetEnrollment      Int
+  currentEnrollment     Int               @default(0)
+  status                String            @default("Recruiting") // Recruiting, Active, Completed, Suspended
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  subjects              TrialSubject[]
+  monitoringQueries     MonitoringQuery[]
+}
+
+model TrialSubject {
+  id                     String         @id @default(uuid())
+  trialId                String
+  trial                  ClinicalTrial  @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  screeningId            String
+  randomizationId        String?
+  subjectInitials        String
+  age                    Int
+  gender                 String
+  assignedArm            String
+  status                 String         @default("Screened") // Screened, Randomized, Active, Completed, Withdrawn
+  enrollmentDate         String
+  baselinePrakriti       String         // JSON: { vata: 40, pitta: 45, kapha: 15, primary: "Pitta-Vata" }
+  doshicDerangement      String?        // JSON: { vata: 6, pitta: 8, kapha: 3 }
+  informedConsentDate    String
+  informedConsentVerified Boolean        @default(true)
+  createdAt              DateTime       @default(now())
+  visits                 EcrfVisit[]
+  adverseEvents          AdverseEvent[]
+
+  @@unique([trialId, screeningId])
+}
+
+model EcrfVisit {
+  id                   String       @id @default(uuid())
+  subjectId            String
+  subject              TrialSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  visitNumber          Int
+  visitName            String
+  scheduledDate        String
+  completedDate        String?
+  status               String       @default("Scheduled") // Scheduled, Completed, Missed, Locked
+  clinicalObservations String       // JSON: Ashtavidha Pariksha, Vitals, Rogi markers
+  sdvStatus            String       @default("Pending")   // Pending, Verified, Discrepancy
+  sdvSignedBy          String?
+  sdvSignedAt          DateTime?
+  craSignatureHash     String?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+}
+
+model AdverseEvent {
+  id                   String       @id @default(uuid())
+  subjectId            String
+  subject              TrialSubject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  eventTerm            String
+  medDraCode           String
+  medDraTerm           String
+  whoDrugCode          String?
+  onsetDate            String
+  severity             String       // Mild, Moderate, Severe, Life-threatening
+  ctcaeGrade           Int          // 1, 2, 3, 4, 5
+  isSeriousnessSae     Boolean      @default(false)
+  seriousnessCriteria  String?      // Hospitalization, Disability, Life Threatening
+  causalityAyushDrug   String       // Definite, Probable, Possible, Unlikely
+  actionTaken          String       // Dose Withdrawn, Dose Reduced, No Action
+  outcome              String       // Recovered, Recovering, Not Recovered
+  reportedToEthics     Boolean      @default(false)
+  reportedToDcgi       Boolean      @default(false)
+  regulatoryDeadline24h DateTime
+  reportedAt           DateTime?
+  createdAt            DateTime     @default(now())
+}
+
+model MonitoringQuery {
+  id               String        @id @default(uuid())
+  trialId          String
+  trial            ClinicalTrial @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  subjectScreeningId String
+  visitName        String
+  field            String
+  issueDescription String
+  raisedBy         String
+  assignedTo       String
+  status           String        @default("Open") // Open, Answered, Resolved
+  response         String?
+  createdAt        DateTime      @default(now())
+  resolvedAt       DateTime?
+}
+
+model AuditLog {
+  id                  Int      @id @default(autoincrement())
+  recordId            String
+  tableName           String
+  operation           String   // INSERT, UPDATE, DELETE, SIGN, VERIFY
+  previousValue       String?
+  newValue            String?
+  modifiedBy          String
+  userRole            String   // ROLE_PI, ROLE_CRC, ROLE_MONITOR, ROLE_ETHICS, ROLE_NPVCC, ROLE_AUDITOR
+  reasonForChange     String   // Mandatory 21 CFR Part 11 / GCP Reason
+  timestamp           DateTime @default(now())
+  previousHash        String
+  recordSignatureHash String
+}
