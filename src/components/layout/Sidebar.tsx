@@ -11,6 +11,7 @@ import {
   ClipboardCheck,
   History,
   FileSpreadsheet,
+  PackageSearch,
 } from "lucide-react";
 
 interface SidebarProps {
@@ -77,6 +78,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
       description: "NAMASTE codes, ODM & SDTM export",
       icon: FileSpreadsheet,
       isActive: pathname === "/dashboard/interoperability",
+    },
+    {
+      href: "/dashboard/ip-tracker",
+      label: "IP Tracker",
+      description: "GCP Inventory & Dispensing",
+      icon: PackageSearch,
+      isActive: pathname === "/dashboard/ip-tracker",
     },
   ];
 

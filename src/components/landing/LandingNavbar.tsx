@@ -57,14 +57,14 @@ export const LandingNavbar: React.FC = () => {
           <ThemeToggle />
 
           <Link
-            href="/dashboard"
+            href="/login"
             className="steep-text-link hidden sm:inline-flex text-sm text-text-secondary"
           >
             Sign in
           </Link>
 
           <Link
-            href="/dashboard"
+            href="/login"
             className="steep-pill-filled text-sm py-2 px-5"
           >
             Get started

@@ -23,9 +23,21 @@ interface DashboardContextType {
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
 
 export const DashboardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentRole, setCurrentRole] = useState<RoleType>("ROLE_PI");
+  const [currentRole, setCurrentRoleState] = useState<RoleType>("ROLE_PI");
   const [selectedTrialId, setSelectedTrialId] = useState<string | null>(null);
   const [showSimulator, setShowSimulator] = useState(false);
+
+  const setCurrentRole = (role: RoleType) => {
+    setCurrentRoleState(role);
+    localStorage.setItem("ayucare_role", role);
+  };
+
+  useEffect(() => {
+    const savedRole = localStorage.getItem("ayucare_role");
+    if (savedRole) {
+      setCurrentRoleState(savedRole as RoleType);
+    }
+  }, []);
 
   const [trials, setTrials] = useState<any[]>([]);
   const [subjects, setSubjects] = useState<any[]>([]);

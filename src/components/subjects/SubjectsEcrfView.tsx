@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Search,
@@ -29,6 +29,14 @@ export const SubjectsEcrfView: React.FC<SubjectsEcrfViewProps> = ({
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [showEcrfEditModal, setShowEcrfEditModal] = useState(false);
   const [activeEditingVisit, setActiveEditingVisit] = useState<any | null>(null);
+  
+  // AI Insights State
+  const [isGeneratingInsight, setIsGeneratingInsight] = useState(false);
+  const [aiInsight, setAiInsight] = useState<string | null>(null);
+
+  useEffect(() => {
+    setAiInsight(null);
+  }, [selectedSubject?.id]);
 
   // New Subject Form State
   const [enrollTrialId, setEnrollTrialId] = useState(selectedTrialId || trials[0]?.id || "");
@@ -65,6 +73,46 @@ export const SubjectsEcrfView: React.FC<SubjectsEcrfViewProps> = ({
     if (v >= p && v >= k) return "Vata Pradhana";
     if (p >= v && p >= k) return "Pitta Pradhana";
     return "Kapha Pradhana";
+  };
+
+  const handleGenerateInsight = async () => {
+    if (!selectedSubject) return;
+    setIsGeneratingInsight(true);
+    setAiInsight(null);
+
+    let pObj: any = { vata: 33, pitta: 33, kapha: 34 };
+    try {
+      pObj = typeof selectedSubject.baselinePrakriti === "string"
+        ? JSON.parse(selectedSubject.baselinePrakriti)
+        : selectedSubject.baselinePrakriti;
+    } catch {}
+
+    try {
+      const res = await fetch("/api/insights", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          vata: pObj.vata,
+          pitta: pObj.pitta,
+          kapha: pObj.kapha,
+          age: selectedSubject.age,
+          gender: selectedSubject.gender,
+          assignedArm: selectedSubject.assignedArm,
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        setAiInsight(err.error || "Failed to generate insight.");
+      } else {
+        const data = await res.json();
+        setAiInsight(data.insight);
+      }
+    } catch (err: any) {
+      setAiInsight("An error occurred while calling the AI model.");
+    } finally {
+      setIsGeneratingInsight(false);
+    }
   };
 
   const handleEnrollSubmit = async (e: React.FormEvent) => {
@@ -380,6 +428,23 @@ export const SubjectsEcrfView: React.FC<SubjectsEcrfViewProps> = ({
                             <div className="bg-text-tertiary h-full" style={{ width: `${pObj.kapha}%` }} />
                           </div>
                         </div>
+                      </div>
+                      
+                      {/* AI Insights Button & Result */}
+                      <div className="pt-4 border-t border-border-subtle">
+                        <button
+                          onClick={handleGenerateInsight}
+                          disabled={isGeneratingInsight}
+                          className="steep-pill-ghost w-full justify-center text-xs"
+                        >
+                          {isGeneratingInsight ? "Analyzing Doshic Balance..." : "✨ Generate AI Risk Insight"}
+                        </button>
+                        
+                        {aiInsight && (
+                          <div className="mt-4 p-4 rounded-xl bg-surface-accent border border-sienna/20 text-sienna text-xs leading-relaxed animate-fade-in-up shadow-steep-subtle font-medium">
+                            {aiInsight}
+                          </div>
+                        )}
                       </div>
                     </div>
                   );

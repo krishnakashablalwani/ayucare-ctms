@@ -25,6 +25,7 @@ model ClinicalTrial {
   updatedAt             DateTime          @updatedAt
   subjects              TrialSubject[]
   monitoringQueries     MonitoringQuery[]
+  investigationalProducts InvestigationalProduct[]
 }
 
 model TrialSubject {
@@ -46,6 +47,7 @@ model TrialSubject {
   createdAt              DateTime       @default(now())
   visits                 EcrfVisit[]
   adverseEvents          AdverseEvent[]
+  ipDispensations        IpDispensation[]
 
   @@unique([trialId, screeningId])
 }
@@ -121,3 +123,36 @@ model AuditLog {
   previousHash        String
   recordSignatureHash String
 }
+
+model InvestigationalProduct {
+  id                    String           @id @default(uuid())
+  trialId               String
+  trial                 ClinicalTrial    @relation(fields: [trialId], references: [id], onDelete: Cascade)
+  batchNumber           String           @unique
+  productName           String
+  manufacturingDate     String
+  expiryDate            String
+  totalQuantityReceived Int
+  quantityDispensed     Int              @default(0)
+  quantityAvailable     Int              @default(0)
+  status                String           @default("Quarantined") // Quarantined, Released, Expired, Destroyed
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  dispensations         IpDispensation[]
+}
+
+model IpDispensation {
+  id                 String                 @id @default(uuid())
+  ipId               String
+  product            InvestigationalProduct @relation(fields: [ipId], references: [id], onDelete: Cascade)
+  subjectId          String
+  subject            TrialSubject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  visitName          String
+  quantityDispensed  Int
+  dispensedDate      String
+  dispensedBy        String
+  quantityReturned   Int?
+  returnedDate       String?
+  createdAt          DateTime               @default(now())
+}
+

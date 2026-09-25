@@ -281,10 +281,10 @@ export const LandingHero: React.FC = () => {
 
           {/* Pill Button Pair */}
           <div className="flex flex-wrap items-center justify-center gap-4 mt-10 animate-fade-in-up animation-delay-200">
-            <Link href="/dashboard" className="steep-pill-filled">
+            <Link href="/login" className="steep-pill-filled">
               Get started
             </Link>
-            <Link href="/dashboard/protocols" className="steep-pill-ghost">
+            <Link href="/login" className="steep-pill-ghost">
               Explore protocols
             </Link>
           </div>

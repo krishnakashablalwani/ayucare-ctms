@@ -35,7 +35,7 @@ const footerColumns = [
     heading: "About",
     links: [
       { label: "AIIA, Ministry of Ayush", href: "#" },
-      { label: "SIH 2024 · PS 26046", href: "#" },
+      { label: "SIH 2026 · PS 26046", href: "#" },
       { label: "Contact", href: "#" },
     ],
   },

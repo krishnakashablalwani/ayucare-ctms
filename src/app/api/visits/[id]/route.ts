@@ -3,9 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { createAuditLog } from "@/lib/audit";
 import crypto from "crypto";
 
-export async function PUT(req: Request, { params }: { params: { id: string } }) {
+export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const {
       status,
@@ -69,9 +69,9 @@ export async function PUT(req: Request, { params }: { params: { id: string } }) 
 }
 
 // SDV Verification by Monitor (CRA)
-export async function POST(req: Request, { params }: { params: { id: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const { id } = params;
+    const { id } = await params;
     const body = await req.json();
     const {
       sdvStatus = "Verified",

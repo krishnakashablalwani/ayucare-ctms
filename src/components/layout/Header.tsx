@@ -70,7 +70,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   return (
     <header className="sticky top-0 z-40 bg-background/90 backdrop-blur-md border-b border-border-subtle transition-colors duration-200">
-      <div className="max-w-steep mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-screen-2xl mx-auto px-6 py-4 flex items-center justify-between">
         {/* Brand */}
         <Link
           href="/"

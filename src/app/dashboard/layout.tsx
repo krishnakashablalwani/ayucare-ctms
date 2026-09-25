@@ -31,7 +31,7 @@ function DashboardLayoutInner({ children }: { children: React.ReactNode }) {
       />
 
       {/* Main Work Area */}
-      <div className="flex-1 flex flex-col md:flex-row max-w-steep w-full mx-auto">
+      <div className="flex-1 flex flex-col md:flex-row max-w-screen-2xl w-full mx-auto">
         <Sidebar
           openQueryCount={openQueryCount}
           pendingSaeCount={pendingSaeCount}
